@@ -116,6 +116,13 @@ _spinner() {
 while true; do
   # Interactive user input
   read -e -p "🧑 $USER: " USER_INPUT
+  READ_STATUS=$?
+
+  # Terminate if there was an error reading input
+  [[ "$READ_STATUS" -gt 1 ]] && exit 1
+
+  # Terminate if input is empty and EOF. If there was an EOF but input was non-empty, process the final input before terminating.
+  [[ -z "$USER_INPUT" && "$READ_STATUS" -eq 1 ]] && exit 0
 
   # Skip iteration if input is empty
   [[ -z "$USER_INPUT" ]] && continue
@@ -199,4 +206,7 @@ while true; do
 
   # Add the AI reply to the chat history array for context
   CHAT_HISTORY+=("$BOT_REPLY")
+
+  # Terminate if this was the final input line before EOF
+  [[ "$READ_STATUS" -eq 1 ]] && exit 0
 done
